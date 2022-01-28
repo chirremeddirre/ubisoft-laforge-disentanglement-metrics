@@ -54,7 +54,7 @@ class beta_VAE(nn.Module):
     x_hat = self.decoder(z)
     return x, x_hat, mu, logvar
 
-  def train(self, n_epoch, loader, device):
+  def _train(self, n_epoch, loader, device):
     beta = 4
     import torch.optim as optim
     optimizer = torch.optim.Adagrad(self.parameters(),
