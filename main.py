@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+#
 import argparse
 import models
 import model_utils
@@ -17,12 +17,10 @@ def main(args):
         else:
                 print(f"Incorrect model type provided: {args.model}")
     else:
-        model = models.beta_VAE(64,10)
-        model.load_state_dict(torch.load(args.model_path, map_location=args.device))
-        model.eval()
+        model = model_utils.load_model(args.model, args.image_size, args.latents, args.model_path, args.device)
     if args.eval:
         dataset = model_utils.load_dsprites(args.load_path)
-        model_utils.eval(model, args.model, dataset, args.metrics, args.device)
+        model_utils.eval(model, args.model, dataset, args.metrics, args.batch_eval_size, args.eval_iters, args.device)
 
 
 if __name__ == "__main__":
@@ -39,5 +37,7 @@ if __name__ == "__main__":
     parser.add_argument('--model_path', default="models", type=str, help="Path to a previously trained model")
     parser.add_argument('--eval', default=True, type=bool, help='Evaluate the model using some dissentanglement metric')
     parser.add_argument('--metrics', default="all", type=str, help='Dissentanglement metrics to use in evaluation, see documentation for valid metrics')
+    parser.add_argument('--batch_eval_size', default=200, type=int, help='Batch size for evaluation')
+    parser.add_argument('--eval_iters', default=25, type=int, help='Number of iterations used in evaluation. Total samples in evaluation = batch_eval_size*eval_iters')
     args = parser.parse_args()
     main(args)

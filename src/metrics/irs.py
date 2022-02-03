@@ -16,7 +16,7 @@ import numpy as np
 
 from sklearn.preprocessing import minmax_scale
 
-from utils import get_bin_index
+from ..utils import get_bin_index
 
 
 def irs(factors, codes, continuous_factors=True, nb_bins=10, diff_quantile=1.):

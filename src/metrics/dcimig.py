@@ -17,7 +17,7 @@ import numpy as np
 from pyitlib import discrete_random_variable as drv
 from sklearn.preprocessing import minmax_scale
 
-from utils import get_bin_index, get_mutual_information
+from ..utils import get_bin_index, get_mutual_information
 
 
 def dcimig(factors, codes, continuous_factors=True, nb_bins=10):

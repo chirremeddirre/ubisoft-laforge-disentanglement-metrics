@@ -18,7 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import minmax_scale, MultiLabelBinarizer
 
-from utils import get_bin_index
+from ..utils import get_bin_index
 
 
 def explicitness(factors, codes, continuous_factors=True, nb_bins=10, scale=True, impl=1):

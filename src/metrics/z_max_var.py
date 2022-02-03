@@ -19,7 +19,7 @@ import numpy as np
 from numpy.core.numeric import NaN
 from sklearn.preprocessing import minmax_scale
 
-from utils import get_bin_index
+from ..utils import get_bin_index
 
 
 def z_max_var(factors, codes, continuous_factors=True, nb_bins=3, batch_size=200, nb_training=800,

@@ -18,7 +18,7 @@ from numpy.core.numeric import NaN
 from sklearn import linear_model
 from sklearn.preprocessing import minmax_scale
 
-from utils import get_bin_index
+from ..utils import get_bin_index
 
     
 def z_diff(factors, codes, continuous_factors=True, nb_bins=10, batch_size=200,

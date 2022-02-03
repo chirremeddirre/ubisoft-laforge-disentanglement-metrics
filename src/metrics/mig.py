@@ -16,7 +16,7 @@ import numpy as np
 
 from sklearn.preprocessing import minmax_scale
 
-from utils import get_bin_index, get_mutual_information
+from ..utils import get_bin_index, get_mutual_information
 
     
 def mig(factors, codes, continuous_factors=True, nb_bins=10):

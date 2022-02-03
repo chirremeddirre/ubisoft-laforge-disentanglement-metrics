@@ -20,7 +20,7 @@ from sklearn.metrics import accuracy_score, r2_score
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import minmax_scale
 
-from utils import get_bin_index
+from ..utils import get_bin_index
 
     
 def sap(factors, codes, continuous_factors=True, nb_bins=10, regression=True):
