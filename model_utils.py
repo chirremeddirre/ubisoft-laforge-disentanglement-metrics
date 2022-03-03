@@ -36,11 +36,50 @@ class dSpritesDataset(Dataset):
         latent = latent[1:] # Drop color col
         return img, latent
 
+class dSpritesColorDataset(Dataset):
+      def __init__(self, ds, transform = None):
+        self.data = ds['imgs']
+        self.latent_values = ds['latents_values']
+        self.pad = np.zeros((64,64))
+        if transform == None:
+          self.transforms = transforms.Compose([transforms.Normalize((0.5,), (0.5,))])
+        else:
+          self.transforms = transform
+
+      def __len__(self):
+         return self.data.shape[0]
+
+      def __getitem__(self, idx):
+        rand = np.random.randint(1,4)
+         #img = np.expand_dims(self.data[idx], axis=0)
+        img = self.data[idx]
+        latent = self.latent_values[idx]
+         #img = self.transforms(img) #
+        if rand == 1:
+          img = np.stack([img, self.pad, self.pad], axis=0)
+          latent[0] = 0
+        elif rand == 2:
+          img = np.stack([self.pad, img, self.pad], axis=0)
+          latent[0] = 0.5
+        else:
+          img = np.stack([self.pad, self.pad, img], axis=0)
+          latent[0] = 1
+        img = torch.from_numpy(img).float()
+        latent = torch.from_numpy(self.latent_values[idx])
+        return img, latent
+
+
 
 def dsprites_loader(path, batch_size):
    dataset = np.load(path) 
    dataset = dSpritesDataset(dataset)
    return DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+def dsprites_color_loader(path, batch_size):
+   dataset = np.load(path)
+   dataset = dSpritesColorDataset(dataset)
+   return DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
 
 def load_dsprites(path):
     dataset = np.load(path)
@@ -52,17 +91,31 @@ def split_batch(batch):
     return x1, x2
 
 def save_model(model, path):
-    full_path = path + "model"
     num = 0
-    while os.path.exists(full_path):
-        full_path = full_path + num
-        num += 1
-    torch.save(model.state_dict(), full_path)
+    full_path = path + "model"
+    if hasattr(a, 'beta'):
+        full_path = full_path + f"_beta_{model.beta}"
+        while os.path.exists(full_path):
+            full_path = full_path + num
+            num += 1
+
+        torch.save({'model_state_dict': model.state_dict(),
+            'beta': model.beta,
+            'dim': model.d,
+            'latents' : model.latents,
+            'size' : model.size
+                    }, full_path)
+    else: # TODO: Check if other than beta-VAE
+        torch.save(model.state_dict(), full_path)
+        while os.path.exists(full_path):
+            full_path = full_path + num
+            num += 1
 
 def load_model(model_type, im_size, latents, path, device):
     if model_type == "beta-vae":
-        model = models.beta_VAE(im_size, latents)
-        model.load_state_dict(torch.load(path, map_location=device))
+        checkpoint = torch.load(path, map_location=torch.device(device))
+        model = models.beta_VAE(checkpoint['size'], checkpoint['dim'], checkpoint['latents'], checkpoint['beta']).to(device)
+        model.load_state_dict(checkpoint['model_state_dict'])
         model.eval()
     return model
 
@@ -87,11 +140,11 @@ def init_res_table(metrics):
 
 def res_table_to_tex(res_table):
     for k in res_table:
-       res_table[k] = [np.mean(res_table[k]), np.var(res_table[k])]
+       res_table[k] = [round(np.mean(res_table[k]),3), round(np.var(res_table[k]),3)]
 
     df = pd.DataFrame.from_dict(res_table)
     df.index = ["Mean", "Variance"]
-    df.to_latex(buf="disentanglement_results")
+    df.to_latex(buf="output/disentanglement_results")
 
 def parse_metric_names(metric_names):
     metric_names = metric_names.lower().split(" ")
@@ -117,6 +170,6 @@ def eval(model, model_type, dataset, metric_names, eval_batch_size, eval_iters ,
                 res_table[name].append(score[0])
             else:
                 res_table[name].append(score)
-    print(res_table["z_diff"])
+    print(res_table["z_diff"]) # TODO: Remove print
     res_table_to_tex(res_table)
     return res_table
